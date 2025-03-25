@@ -33,6 +33,8 @@ workflows:
       - cypress/run:
           name: run-component-tests
           cypress-command: npx cypress run --component
+          requires:
+            - start-server
       - deploy-to-render-staging:
           # TODO: What does the requires key do?
           requires:
