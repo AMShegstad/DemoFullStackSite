@@ -1,3 +1,49 @@
+# version: 2.1
+
+# orbs:
+#   cypress: cypress-io/cypress@3.3.1
+
+# jobs:
+#   start-server:
+#         docker:
+#           - image: cypress/base:latest
+#         steps:
+#           - checkout
+#           - run:
+#               name: Install dependencies
+#               command: npm install
+#           - run:
+#               name: Build the app
+#               command: npm run build
+#   deploy-to-render-staging:
+#     docker:
+#       - image: cimg/base:current
+#     steps:
+#       - run:
+#           name: Deploy to Render Staging
+#           # TODO: What is happening in the following command?
+#           command: |
+#             echo "Deploying to Render Staging"
+#             curl $RENDER_STAGING_DEPLOYHOOK
+
+# workflows:
+#   run-tests-and-deploy-to-staging:
+#     jobs:
+#       - start-server
+#       - cypress/run:
+#           name: run-component-tests
+#           cypress-command: npx cypress run --component
+#           requires:
+#             - start-server
+#       - deploy-to-render-staging:
+#           # TODO: What does the requires key do?
+#           requires:
+#             - run-component-tests
+#           # TODO: What does the filters key do?
+#           filters:
+#             branches:
+#               only: main
+
 version: 2.1
 
 orbs:
@@ -21,13 +67,21 @@ jobs:
     steps:
       - run:
           name: Deploy to Render Staging
-          # TODO: What is happening in the following command?
           command: |
             echo "Deploying to Render Staging"
             curl $RENDER_STAGING_DEPLOYHOOK
+  deploy-to-render-production:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - run:
+          name: Deploy to Render Production
+          command: |
+            echo "Deploying to Render production"
+            curl $RENDER_PRODUCTION_DEPLOYHOOK
 
 workflows:
-  run-tests-and-deploy-to-staging:
+  run-tests-and-deploy-to-staging-then-production:
     jobs:
       - start-server
       - cypress/run:
@@ -36,10 +90,14 @@ workflows:
           requires:
             - start-server
       - deploy-to-render-staging:
-          # TODO: What does the requires key do?
           requires:
             - run-component-tests
-          # TODO: What does the filters key do?
+          filters:
+            branches:
+              only: main
+      - deploy-to-render-production:
+          requires:
+            - deploy-to-render-staging
           filters:
             branches:
               only: main
