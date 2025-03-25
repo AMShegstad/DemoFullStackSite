@@ -95,9 +95,13 @@ workflows:
           filters:
             branches:
               only: main
-      - deploy-to-render-production:
+      - hold:
+          type: approval
           requires:
             - deploy-to-render-staging
+      - deploy-to-render-production:
+          requires:
+            - hold
           filters:
             branches:
               only: main
