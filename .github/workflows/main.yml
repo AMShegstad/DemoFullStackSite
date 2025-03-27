@@ -8,6 +8,7 @@ on:
       - develop
       - staging
       - githubActions
+      - main
 
 # Jobs to carry out
 jobs:
